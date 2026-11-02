@@ -20,14 +20,51 @@ const { NotImplementedError } = require('../lib');
  *
  */
 class VigenereCipheringMachine {
-  encrypt() {
-    // Remove line below and write your code here
-    throw new NotImplementedError('Not implemented');
+  constructor(isDirect = true) {
+    this.isDirect = isDirect;
   }
 
-  decrypt() {
-    // Remove line below and write your code here
-    throw new NotImplementedError('Not implemented');
+  _process(message, key, isEncrypting) {
+    if (!message || !key) {
+      throw new Error('Incorrect arguments!');
+    }
+    const upperMessage = message.toUpperCase();
+    const upperKey = key.toUpperCase();
+    const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    
+    let result = '';
+    let keyIndex = 0;
+
+    for (let i = 0; i < upperMessage.length; i++) {
+      const char = upperMessage[i];
+      const charIndex = alphabet.indexOf(char);
+      if (charIndex === -1) {
+        result += char;
+      } else {
+        const keyChar = upperKey[keyIndex % upperKey.length];
+        const keyCharIndex = alphabet.indexOf(keyChar);
+        
+        let processedIndex;
+        if (isEncrypting) {
+          processedIndex = (charIndex + keyCharIndex) % alphabet.length;
+        } else {
+          processedIndex = (charIndex - keyCharIndex + alphabet.length) % alphabet.length;
+        }
+
+        result += alphabet[processedIndex];
+        keyIndex++;
+      }
+    }
+
+    return this.isDirect ? result : result.split('').reverse().join('');
+  }
+
+  encrypt(message, key) {
+    return this._process(message, key, true);
+  }
+
+  decrypt(encryptedMessage, key) {
+    return this._process(encryptedMessage, key, false);
   }
 }
 
